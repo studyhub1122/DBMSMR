@@ -1,0 +1,40 @@
+CREATE TABLE Movie (
+    Mid   INT PRIMARY KEY,
+    Mname VARCHAR(100) NOT NULL,
+    Year  INT
+);
+
+CREATE TABLE Booking (
+    Bid    INT PRIMARY KEY,
+    Mid    INT,
+    Amount DECIMAL(10,2),
+    FOREIGN KEY (Mid) REFERENCES Movie(Mid)
+);
+
+INSERT INTO Movie VALUES (1,'Pathaan',2023),(2,'RRR',2022),(3,'KGF',2022);
+
+INSERT INTO Booking VALUES
+(1,1,500),(2,1,700),(3,2,400),(4,3,600),(5,3,800);
+
+-- i. Display movies released after 2020
+SELECT * FROM Movie WHERE Year > 2020;
+
+-- ii. Count bookings per movie
+SELECT m.Mname, COUNT(b.Bid) AS BookingCount
+FROM Movie m
+LEFT JOIN Booking b ON m.Mid = b.Mid
+GROUP BY m.Mname;
+
+-- iii. Display movie with booking details using JOIN
+SELECT m.Mname, b.Bid, b.Amount
+FROM Booking b
+JOIN Movie m ON b.Mid = m.Mid;
+
+-- iv. Display movies having bookings above average using nested query
+SELECT m.Mname, COUNT(b.Bid) AS BookingCount
+FROM Movie m
+JOIN Booking b ON m.Mid = b.Mid
+GROUP BY m.Mid, m.Mname
+HAVING COUNT(b.Bid) > (SELECT AVG(Cnt) FROM (
+    SELECT COUNT(*) AS Cnt FROM Booking GROUP BY Mid
+) AS Sub);
