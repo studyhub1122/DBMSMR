@@ -1,0 +1,77 @@
+CREATE TABLE Department (
+    DeptId   INT PRIMARY KEY,
+    DeptName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Student (
+    Sid    INT PRIMARY KEY,
+    Sname  VARCHAR(50) NOT NULL,
+    DeptId INT,
+    FOREIGN KEY (DeptId) REFERENCES Department(DeptId)
+);
+
+CREATE TABLE Result (
+    Sid   INT PRIMARY KEY,
+    Marks INT,
+    FOREIGN KEY (Sid) REFERENCES Student(Sid)
+);
+
+INSERT INTO Department VALUES (1,'CS'),(2,'IT'),(3,'Mech');
+
+INSERT INTO Student VALUES
+(1,'Amit',1),(2,'Sara',2),(3,'Ravi',1),(4,'Neha',3);
+
+INSERT INTO Result VALUES (1,75),(2,55),(3,82),(4,48);
+
+-- i. Display students with marks above 60
+SELECT s.Sname, r.Marks
+FROM Student s
+JOIN Result r ON s.Sid = r.Sid
+WHERE r.Marks > 60;
+
+-- ii. Display department-wise average marks
+SELECT d.DeptName, AVG(r.Marks) AS AvgMarks
+FROM Department d
+JOIN Student s ON d.DeptId = s.DeptId
+JOIN Result r ON s.Sid = r.Sid
+GROUP BY d.DeptName;
+
+-- iii. Display student with department and marks using JOIN
+SELECT s.Sname, d.DeptName, r.Marks
+FROM Student s
+JOIN Department d ON s.DeptId = d.DeptId
+JOIN Result r ON s.Sid = r.Sid;
+
+-- iv. Display students scoring above department average using nested query
+SELECT s.Sname, d.DeptName, r.Marks
+FROM Student s
+JOIN Department d ON s.DeptId = d.DeptId
+JOIN Result r ON s.Sid = r.Sid
+WHERE r.Marks > (
+    SELECT AVG(r2.Marks)
+    FROM Student s2
+    JOIN Result r2 ON s2.Sid = r2.Sid
+    WHERE s2.DeptId = s.DeptId
+);
+
+-- v. Cursor to display student names and marks
+DELIMITER $$
+CREATE PROCEDURE DisplayStudentMarks()
+BEGIN
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_marks INT;
+    DECLARE done INT DEFAULT 0;
+    DECLARE cur CURSOR FOR
+        SELECT s.Sname, r.Marks FROM Student s JOIN Result r ON s.Sid = r.Sid;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO v_name, v_marks;
+        IF done THEN LEAVE read_loop; END IF;
+        SELECT v_name AS StudentName, v_marks AS Marks;
+    END LOOP;
+    CLOSE cur;
+END$$
+DELIMITER ;
+CALL DisplayStudentMarks();
