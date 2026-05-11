@@ -1,0 +1,46 @@
+CREATE TABLE Book (
+    Bid   INT PRIMARY KEY,
+    Title VARCHAR(100) NOT NULL,
+    Price DECIMAL(8,2),
+    Dept  VARCHAR(50)
+);
+
+CREATE TABLE Member (
+    Mid   INT PRIMARY KEY,
+    Mname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Issue (
+    Bid       INT,
+    Mid       INT,
+    IssueDate DATE,
+    PRIMARY KEY (Bid, Mid),
+    FOREIGN KEY (Bid) REFERENCES Book(Bid),
+    FOREIGN KEY (Mid) REFERENCES Member(Mid)
+);
+
+INSERT INTO Book VALUES
+(1,'Database Systems',450,'Computer'),(2,'Networks',380,'Computer'),
+(3,'Physics',300,'Science'),(4,'DBMS Concepts',500,'Computer');
+
+INSERT INTO Member VALUES
+(1,'Rahul'),(2,'Priya'),(3,'Kiran');
+
+INSERT INTO Issue VALUES
+(1,1,'2024-01-10'),(2,2,'2024-02-15'),(4,3,'2024-03-01');
+
+-- i. Display books from Computer department
+SELECT * FROM Book WHERE Dept = 'Computer';
+
+-- ii. Count number of books issued
+SELECT COUNT(*) AS TotalIssued FROM Issue;
+
+-- iii. Display book title with member name using JOIN
+SELECT b.Title, m.Mname, i.IssueDate
+FROM Issue i
+JOIN Book b ON i.Bid = b.Bid
+JOIN Member m ON i.Mid = m.Mid;
+
+-- iv. Display books issued by members using nested query
+SELECT * FROM Book
+WHERE Bid IN (SELECT Bid FROM Issue);
