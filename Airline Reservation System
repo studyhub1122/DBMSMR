@@ -1,0 +1,49 @@
+CREATE TABLE Flight (
+    Fid         INT PRIMARY KEY,
+    Source      VARCHAR(50),
+    Destination VARCHAR(50)
+);
+
+CREATE TABLE Passenger (
+    Pid   INT PRIMARY KEY,
+    Pname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Reservation (
+    Fid INT,
+    Pid INT,
+    PRIMARY KEY (Fid, Pid),
+    FOREIGN KEY (Fid) REFERENCES Flight(Fid),
+    FOREIGN KEY (Pid) REFERENCES Passenger(Pid)
+);
+
+INSERT INTO Flight VALUES
+(1,'Pune','Delhi'),(2,'Mumbai','Delhi'),(3,'Pune','Chennai');
+
+INSERT INTO Passenger VALUES
+(1,'Amit'),(2,'Sara'),(3,'Ravi'),(4,'Neha');
+
+INSERT INTO Reservation VALUES
+(1,1),(1,2),(2,3),(3,4),(2,4);
+
+-- i. Display flights from Pune
+SELECT * FROM Flight WHERE Source = 'Pune';
+
+-- ii. Count passengers per flight
+SELECT f.Fid, f.Source, f.Destination, COUNT(r.Pid) AS PassengerCount
+FROM Flight f
+LEFT JOIN Reservation r ON f.Fid = r.Fid
+GROUP BY f.Fid, f.Source, f.Destination;
+
+-- iii. Display passenger with flight details using JOIN
+SELECT p.Pname, f.Source, f.Destination
+FROM Reservation r
+JOIN Passenger p ON r.Pid = p.Pid
+JOIN Flight f ON r.Fid = f.Fid;
+
+-- iv. Display passengers booked on flights to Delhi using nested query
+SELECT * FROM Passenger
+WHERE Pid IN (
+    SELECT Pid FROM Reservation
+    WHERE Fid IN (SELECT Fid FROM Flight WHERE Destination = 'Delhi')
+);
