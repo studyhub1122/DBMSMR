@@ -1,0 +1,50 @@
+CREATE TABLE Customer (
+    Cid   INT PRIMARY KEY,
+    Cname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Policy (
+    Pid     INT PRIMARY KEY,
+    Cid     INT,
+    Premium DECIMAL(10,2),
+    FOREIGN KEY (Cid) REFERENCES Customer(Cid)
+);
+
+CREATE TABLE Claim (
+    Clid   INT PRIMARY KEY,
+    Pid    INT,
+    Amount DECIMAL(10,2),
+    FOREIGN KEY (Pid) REFERENCES Policy(Pid)
+);
+
+INSERT INTO Customer VALUES (1,'Amit'),(2,'Sara'),(3,'Ravi');
+
+INSERT INTO Policy VALUES
+(1,1,5000),(2,2,8000),(3,3,6000),(4,1,4000);
+
+INSERT INTO Claim VALUES
+(1,1,15000),(2,2,8000),(3,3,12000),(4,4,9000);
+
+-- i. Display claims above 10000
+SELECT * FROM Claim WHERE Amount > 10000;
+
+-- ii. Display total claim amount per customer
+SELECT c.Cname, SUM(cl.Amount) AS TotalClaim
+FROM Customer c
+JOIN Policy p ON c.Cid = p.Cid
+JOIN Claim cl ON p.Pid = cl.Pid
+GROUP BY c.Cname;
+
+-- iii. Display customer with policy and claim using JOIN
+SELECT c.Cname, p.Premium, cl.Amount AS ClaimAmount
+FROM Customer c
+JOIN Policy p ON c.Cid = p.Cid
+JOIN Claim cl ON p.Pid = cl.Pid;
+
+-- iv. Display customers whose claim amount is above average using nested query
+SELECT DISTINCT c.Cname
+FROM Customer c
+JOIN Policy p ON c.Cid = p.Cid
+JOIN Claim cl ON p.Pid = cl.Pid
+WHERE cl.Amount > (SELECT AVG(Amount) FROM Claim);
+
