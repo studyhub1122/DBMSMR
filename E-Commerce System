@@ -1,0 +1,52 @@
+CREATE TABLE Customer (
+    Cid   INT PRIMARY KEY,
+    Cname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Orders (
+    Oid INT PRIMARY KEY,
+    Cid INT,
+    FOREIGN KEY (Cid) REFERENCES Customer(Cid)
+);
+
+CREATE TABLE OrderItem (
+    Oid INT,
+    Pid INT,
+    Qty INT,
+    PRIMARY KEY (Oid, Pid),
+    FOREIGN KEY (Oid) REFERENCES Orders(Oid)
+);
+
+INSERT INTO Customer VALUES (1,'Amit'),(2,'Sara'),(3,'Ravi');
+
+INSERT INTO Orders VALUES (1,1),(2,1),(3,2),(4,3);
+
+INSERT INTO OrderItem VALUES
+(1,101,2),(1,102,1),(2,103,3),(3,101,1),(4,102,2);
+
+-- i. Display customers who placed orders
+SELECT DISTINCT c.* FROM Customer c
+JOIN Orders o ON c.Cid = o.Cid;
+
+-- ii. Count order items per order
+SELECT o.Oid, COUNT(oi.Pid) AS ItemCount
+FROM Orders o
+JOIN OrderItem oi ON o.Oid = oi.Oid
+GROUP BY o.Oid;
+
+-- iii. Display customer with order details using JOIN
+SELECT c.Cname, o.Oid, oi.Pid, oi.Qty
+FROM Customer c
+JOIN Orders o ON c.Cid = o.Cid
+JOIN OrderItem oi ON o.Oid = oi.Oid;
+
+-- iv. Display customers placing more than average number of orders using nested query
+SELECT c.Cname, COUNT(o.Oid) AS OrderCount
+FROM Customer c
+JOIN Orders o ON c.Cid = o.Cid
+GROUP BY c.Cid, c.Cname
+HAVING COUNT(o.Oid) > (
+    SELECT AVG(Cnt) FROM (
+        SELECT COUNT(*) AS Cnt FROM Orders GROUP BY Cid
+    ) AS Sub
+);
