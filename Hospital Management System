@@ -1,0 +1,55 @@
+CREATE TABLE Patient (
+    Pid   INT PRIMARY KEY,
+    Pname VARCHAR(50) NOT NULL,
+    Age   INT NOT NULL
+);
+
+CREATE TABLE Doctor (
+    Did            INT PRIMARY KEY,
+    Dname          VARCHAR(50) NOT NULL,
+    Specialization VARCHAR(50)
+);
+
+CREATE TABLE Visit (
+    Pid       INT,
+    Did       INT,
+    VisitDate DATE,
+    PRIMARY KEY (Pid, Did, VisitDate),
+    FOREIGN KEY (Pid) REFERENCES Patient(Pid),
+    FOREIGN KEY (Did) REFERENCES Doctor(Did)
+);
+
+INSERT INTO Patient VALUES
+(1,'Anita',55),(2,'Manoj',45),(3,'Suresh',62),(4,'Leena',38);
+
+INSERT INTO Doctor VALUES
+(1,'Dr. Sharma','Cardiology'),(2,'Dr. Mehta','Neurology'),
+(3,'Dr. Patil','Cardiology');
+
+INSERT INTO Visit VALUES
+(1,1,'2024-01-05'),(2,2,'2024-01-06'),
+(3,1,'2024-01-07'),(4,3,'2024-01-08');
+
+-- i. Display patients above age 50
+SELECT * FROM Patient WHERE Age > 50;
+
+-- ii. Count patients per doctor
+SELECT d.Dname, COUNT(v.Pid) AS PatientCount
+FROM Doctor d
+LEFT JOIN Visit v ON d.Did = v.Did
+GROUP BY d.Dname;
+
+-- iii. Display patient name with doctor name using JOIN
+SELECT p.Pname, d.Dname, v.VisitDate
+FROM Visit v
+JOIN Patient p ON v.Pid = p.Pid
+JOIN Doctor d ON v.Did = d.Did;
+
+-- iv. Display patients treated by doctors with specialization "Cardiology"
+SELECT * FROM Patient
+WHERE Pid IN (
+    SELECT Pid FROM Visit
+    WHERE Did IN (
+        SELECT Did FROM Doctor WHERE Specialization = 'Cardiology'
+    )
+);
