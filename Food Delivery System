@@ -1,0 +1,41 @@
+CREATE TABLE Restaurant (
+    Rid   INT PRIMARY KEY,
+    Rname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Orders (
+    Oid    INT PRIMARY KEY,
+    Rid    INT,
+    Amount DECIMAL(10,2),
+    FOREIGN KEY (Rid) REFERENCES Restaurant(Rid)
+);
+
+INSERT INTO Restaurant VALUES (1,'Pizza Hub'),(2,'Biryani House'),(3,'Burger King');
+
+INSERT INTO Orders VALUES
+(1,1,1200),(2,1,800),(3,2,1500),(4,3,900),(5,2,1100);
+
+-- i. Display restaurants having orders above 1000
+SELECT DISTINCT r.* FROM Restaurant r
+JOIN Orders o ON r.Rid = o.Rid
+WHERE o.Amount > 1000;
+
+-- ii. Display total revenue per restaurant
+SELECT r.Rname, SUM(o.Amount) AS TotalRevenue
+FROM Restaurant r
+JOIN Orders o ON r.Rid = o.Rid
+GROUP BY r.Rname;
+
+-- iii. Display restaurant with order amount using JOIN
+SELECT r.Rname, o.Oid, o.Amount
+FROM Orders o
+JOIN Restaurant r ON o.Rid = r.Rid;
+
+-- iv. Display restaurants having revenue above average using nested query
+SELECT r.Rname, SUM(o.Amount) AS Revenue
+FROM Restaurant r
+JOIN Orders o ON r.Rid = o.Rid
+GROUP BY r.Rid, r.Rname
+HAVING SUM(o.Amount) > (SELECT AVG(TotalAmt) FROM (
+    SELECT SUM(Amount) AS TotalAmt FROM Orders GROUP BY Rid
+) AS Sub);
