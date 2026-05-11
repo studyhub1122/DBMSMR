@@ -1,0 +1,58 @@
+CREATE TABLE Class (
+    ClassId   INT PRIMARY KEY,
+    ClassName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Student (
+    Sid     INT PRIMARY KEY,
+    Sname   VARCHAR(50) NOT NULL,
+    ClassId INT,
+    FOREIGN KEY (ClassId) REFERENCES Class(ClassId)
+);
+
+CREATE TABLE Marks (
+    Sid     INT,
+    Subject VARCHAR(50),
+    Marks   INT,
+    PRIMARY KEY (Sid, Subject),
+    FOREIGN KEY (Sid) REFERENCES Student(Sid)
+);
+
+INSERT INTO Class VALUES (1,'FY'),(2,'SY');
+
+INSERT INTO Student VALUES
+(1,'Amit',1),(2,'Sara',1),(3,'Ravi',2),(4,'Neha',2);
+
+INSERT INTO Marks VALUES
+(1,'Math',80),(1,'Science',78),(2,'Math',60),(2,'Science',72),
+(3,'Math',90),(3,'Science',85),(4,'Math',55),(4,'Science',62);
+
+-- i. Display students scoring above 75
+SELECT DISTINCT s.Sname, m.Marks
+FROM Student s
+JOIN Marks m ON s.Sid = m.Sid
+WHERE m.Marks > 75;
+
+-- ii. Display class-wise average marks
+SELECT c.ClassName, AVG(m.Marks) AS AvgMarks
+FROM Class c
+JOIN Student s ON c.ClassId = s.ClassId
+JOIN Marks m ON s.Sid = m.Sid
+GROUP BY c.ClassName;
+
+-- iii. Display student with class and marks using JOIN
+SELECT s.Sname, c.ClassName, m.Subject, m.Marks
+FROM Student s
+JOIN Class c ON s.ClassId = c.ClassId
+JOIN Marks m ON s.Sid = m.Sid;
+
+-- iv. Display students scoring above class average using nested query
+SELECT s.Sname, m.Subject, m.Marks
+FROM Student s
+JOIN Marks m ON s.Sid = m.Sid
+WHERE m.Marks > (
+    SELECT AVG(m2.Marks)
+    FROM Student s2
+    JOIN Marks m2 ON s2.Sid = m2.Sid
+    WHERE s2.ClassId = s.ClassId
+);
