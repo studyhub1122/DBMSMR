@@ -1,0 +1,39 @@
+CREATE TABLE Class (
+    ClassId   INT PRIMARY KEY,
+    ClassName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Student (
+    Sid     INT PRIMARY KEY,
+    Sname   VARCHAR(50) NOT NULL,
+    ClassId INT,
+    Marks   INT,
+    FOREIGN KEY (ClassId) REFERENCES Class(ClassId)
+);
+
+INSERT INTO Class VALUES (1,'FY'),(2,'SY'),(3,'TY');
+
+INSERT INTO Student VALUES
+(1,'Amit',1,75),(2,'Sara',2,55),(3,'Ravi',1,80),
+(4,'Neha',3,45),(5,'Kiran',2,90);
+
+-- i. Display students with marks > 60
+SELECT * FROM Student WHERE Marks > 60;
+
+-- ii. Display class-wise average marks
+SELECT c.ClassName, AVG(s.Marks) AS AvgMarks
+FROM Class c
+JOIN Student s ON c.ClassId = s.ClassId
+GROUP BY c.ClassName;
+
+-- iii. Display student with class name using JOIN
+SELECT s.Sname, c.ClassName, s.Marks
+FROM Student s
+JOIN Class c ON s.ClassId = c.ClassId;
+
+-- iv. Display students scoring above class average using nested query
+SELECT s.Sname, s.Marks, s.ClassId
+FROM Student s
+WHERE s.Marks > (
+    SELECT AVG(Marks) FROM Student s2 WHERE s2.ClassId = s.ClassId
+);
