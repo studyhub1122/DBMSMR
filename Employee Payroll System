@@ -1,0 +1,38 @@
+CREATE TABLE Department (
+    DeptId   INT PRIMARY KEY,
+    DeptName VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE Employee (
+    Eid    INT PRIMARY KEY,
+    Ename  VARCHAR(50) NOT NULL,
+    DeptId INT,
+    Salary DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (DeptId) REFERENCES Department(DeptId)
+);
+
+INSERT INTO Department VALUES (1,'HR'),(2,'IT'),(3,'Finance');
+
+INSERT INTO Employee VALUES
+(1,'Raj',1,45000),(2,'Priya',2,60000),(3,'Suresh',1,55000),
+(4,'Neha',3,70000),(5,'Amit',2,50000);
+
+-- i. Display employees from HR department
+SELECT e.* FROM Employee e
+JOIN Department d ON e.DeptId = d.DeptId
+WHERE d.DeptName = 'HR';
+
+-- ii. Display department-wise average salary
+SELECT d.DeptName, AVG(e.Salary) AS AvgSalary
+FROM Department d
+JOIN Employee e ON d.DeptId = e.DeptId
+GROUP BY d.DeptName;
+
+-- iii. Display employee with department name using JOIN
+SELECT e.Ename, d.DeptName, e.Salary
+FROM Employee e
+JOIN Department d ON e.DeptId = d.DeptId;
+
+-- iv. Display employees earning above average salary using nested query
+SELECT * FROM Employee
+WHERE Salary > (SELECT AVG(Salary) FROM Employee);
